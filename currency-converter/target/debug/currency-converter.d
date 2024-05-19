@@ -1,1 +1,0 @@
-/home/jakubfronczyk/repositories/study/rust-learning-projects/currency-converter/target/debug/currency-converter: /home/jakubfronczyk/repositories/study/rust-learning-projects/currency-converter/src/main.rs
