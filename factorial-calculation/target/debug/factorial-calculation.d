@@ -1,0 +1,1 @@
+/home/jakubfronczyk/repositories/study/rust-learning-projects/factorial-calculation/target/debug/factorial-calculation: /home/jakubfronczyk/repositories/study/rust-learning-projects/factorial-calculation/src/main.rs
