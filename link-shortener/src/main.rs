@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use axum::{
-    routing::{get, post},
+    routing::{get, patch, post},
     Router,
 };
 use axum_prometheus::PrometheusMetricLayer;
@@ -11,7 +11,7 @@ use sqlx::postgres::PgPoolOptions;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::routes::{create_link, redirect};
+use crate::routes::{create_link, get_link_statistics, redirect, update_link};
 
 mod routes;
 mod utils;
@@ -49,7 +49,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Create the Axum application
     let app = Router::new()
         .route("/create", post(create_link))
-        .route("/:id", get(redirect))
+        .route("/:id/statistics", get(get_link_statistics))
+        .route("/:id", patch(update_link).get(redirect))
         // Define a route for "/metrics" endpoint to serve Prometheus metrics
         .route("/metrics", get(|| async move { metrics_handle.render() }))
         // Define a route for "/health" endpoint using the health function imported from routes module
