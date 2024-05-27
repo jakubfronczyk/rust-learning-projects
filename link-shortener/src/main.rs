@@ -1,6 +1,8 @@
 use std::error::Error;
 
+use auth::auth;
 use axum::{
+    middleware,
     routing::{get, patch, post},
     Router,
 };
@@ -13,6 +15,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::routes::{create_link, get_link_statistics, redirect, update_link};
 
+mod auth;
 mod routes;
 mod utils;
 
@@ -50,16 +53,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let app = Router::new()
         .route("/create", post(create_link))
         .route("/:id/statistics", get(get_link_statistics))
-        .route("/:id", patch(update_link).get(redirect))
-        // Define a route for "/metrics" endpoint to serve Prometheus metrics
+        .route_layer(middleware::from_fn_with_state(db.clone(), auth))
+        .route(
+            "/:id",
+            patch(update_link)
+                .route_layer(middleware::from_fn_with_state(db.clone(), auth))
+                .get(redirect),
+        )
         .route("/metrics", get(|| async move { metrics_handle.render() }))
-        // Define a route for "/health" endpoint using the health function imported from routes module
         .route("/health", get(health))
-        // Add TraceLayer for HTTP tracing
         .layer(TraceLayer::new_for_http())
-        // Add PrometheusMetricLayer for metrics
         .layer(prometheus_layer)
-        //
         .with_state(db);
 
     // Bind a TCP listener to address "0.0.0.0:3000"
